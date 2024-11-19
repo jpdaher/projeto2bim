@@ -39,7 +39,7 @@ export default function LoginScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.welcomeText}>
-        Bem-vindo!
+        Bem-vindo ao InovaWeek!
       </ThemedText>
       <TextInput
         placeholder="Email"

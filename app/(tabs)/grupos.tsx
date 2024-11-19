@@ -131,7 +131,7 @@ export default function GroupsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Grupos</Text>
+        <Text style={styles.title}>Grupos do InovaWeek</Text>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
