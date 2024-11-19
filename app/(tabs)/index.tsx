@@ -73,7 +73,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => alert("A função de recuperação de senha ainda não foi implementada.")}>
+          onPress={() => router.replace('/recuperar')}>
           <ThemedText style={styles.buttonText}>Esqueci a senha</ThemedText>
         </TouchableOpacity>
 

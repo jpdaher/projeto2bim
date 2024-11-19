@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { View, TextInput, TouchableOpacity, useWindowDimensions, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useRouter } from 'expo-router';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const { width } = useWindowDimensions();
+  const router = useRouter();
 
   const isLargeScreen = width >= 800;
   const inputWidth = isLargeScreen ? '30%' : '90%';
@@ -26,13 +28,13 @@ export default function ForgotPasswordScreen() {
       />
       <TouchableOpacity
         style={[styles.resetButton, { width: inputWidth }]}
-        onPress={() => { /* Lógica de recuperação de senha aqui */ }}
+        onPress={() => {alert("Função não implementada ainda")}}
       >
         <ThemedText style={styles.buttonText}>Enviar Link de Recuperação</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.secondaryButton, { width: inputWidth }]}
-        onPress={() => { /* Lógica de login aqui */ }}
+        onPress={() => {router.replace('/')}}
       >
         <ThemedText style={styles.buttonText}>Voltar para o Login</ThemedText>
       </TouchableOpacity>
