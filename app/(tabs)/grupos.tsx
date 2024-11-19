@@ -5,6 +5,10 @@ import { supabase } from '../supabase';
 import GroupCard from '../../components/GrupoCollapsible';
 
 // Defina os tipos para as tabelas
+interface Avaliacao {
+  estrelas: string;
+}
+
 interface Grupo {
   id_grupo: number;
   nome: string;
@@ -21,34 +25,66 @@ export default function GroupsScreen() {
   const router = useRouter();
   const [groups, setGroups] = useState<Grupo[]>([]);
   const [students, setStudents] = useState<Aluno[]>([]);
+  const [groupRatings, setGroupRatings] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchGroupsAndStudents() {
+    async function fetchData() {
       setLoading(true);
 
-      // Fetch grupos
-      const { data: groupData, error: groupError } = await supabase
-        .from('grupos')
-        .select('id_grupo, nome, descricao, tema');
+      try {
+        // Busca os grupos
+        const { data: groupData, error: groupError } = await supabase
+          .from('grupos')
+          .select('id_grupo, nome, descricao, tema');
 
-      // Fetch alunos
-      const { data: studentData, error: studentError } = await supabase
-        .from('alunos')
-        .select('id_grupo, nome');
+        if (groupError) throw groupError;
 
-      if (groupError || studentError) {
-        console.error('Erro ao buscar dados:', groupError || studentError);
-        Alert.alert('Erro', 'Não foi possível carregar os dados dos grupos e alunos.');
-      } else {
+        // Busca os alunos
+        const { data: studentData, error: studentError } = await supabase
+          .from('alunos')
+          .select('id_grupo, nome');
+
+        if (studentError) throw studentError;
+
+        // Busca as avaliações
+        const { data: ratingData, error: ratingError } = await supabase
+          .from('avaliacoes')
+          .select('id_grupo, estrelas');
+
+        if (ratingError) throw ratingError;
+
+        // Calcula a média das notas por grupo
+        const ratingsByGroup = ratingData?.reduce((acc, curr) => {
+          const { id_grupo, estrelas } = curr;
+          const rating = parseFloat(estrelas);
+          if (!acc[id_grupo]) acc[id_grupo] = [];
+          acc[id_grupo].push(rating);
+          return acc;
+        }, {} as { [key: number]: number[] });
+
+        const ratingsAverage = Object.entries(ratingsByGroup || {}).reduce(
+          (acc, [groupId, ratings]) => {
+            const average =
+              ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+            acc[parseInt(groupId, 10)] = average.toFixed(2);
+            return acc;
+          },
+          {} as { [key: number]: string }
+        );
+
         setGroups(groupData || []);
         setStudents(studentData || []);
+        setGroupRatings(ratingsAverage);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        Alert.alert('Erro', 'Não foi possível carregar os dados dos grupos e alunos.');
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
-    fetchGroupsAndStudents();
+    fetchData();
   }, []);
 
   async function handleLogout() {
@@ -75,6 +111,9 @@ export default function GroupsScreen() {
         .filter((student) => student.id_grupo === group.id_grupo)
         .map((student) => student.nome);
 
+      // Obtém a média das avaliações para este grupo
+      const notaMedia = groupRatings[group.id_grupo] || 'N/A';
+
       return (
         <GroupCard
           key={group.id_grupo}
@@ -82,6 +121,7 @@ export default function GroupsScreen() {
           members={groupMembers}
           theme={group.tema}
           description={group.descricao}
+          notaMedia={notaMedia}
         />
       );
     });
